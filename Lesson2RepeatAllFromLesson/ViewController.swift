@@ -7,7 +7,12 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UIScrollViewDelegate {
+    
+    @IBOutlet var switchLabel: UILabel!
+    @IBOutlet var switchOnOffOutlet: UISwitch!
+    @IBOutlet var scrollViewOutlet: UIScrollView!
+    @IBOutlet var datePickerOutlet: UIDatePicker!
     
     @IBOutlet var doneButtonOutlet: UIButton!
     @IBOutlet var textFieldOutlet: UITextField!
@@ -17,6 +22,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         
         // Setup Main label
         mainLabel.font = mainLabel.font.withSize(30)
@@ -35,9 +41,22 @@ class ViewController: UIViewController {
         sliderOutlet.thumbTintColor = .blue
         
         mainLabel.text = String(Int(sliderOutlet.value))
-
+       
+        
+        //Setup date picker
+        datePickerOutlet.locale = Locale(identifier: "ru_RU")
+        
+        
+        // локализация
+//        datePickerOutlet.locale = Locale.current
+        
+        switchOnOffOutlet.onTintColor = .red
+        
+        switchLabel.text = nil
         
     }
+    
+
     
     @IBAction func changeSegmentInController() {
         switch segmentControlOutlet.selectedSegmentIndex {
@@ -56,20 +75,65 @@ class ViewController: UIViewController {
     }
     
     @IBAction func sliderAction() {
-        let backGroundColor = view.backgroundColor
-        view.backgroundColor = backGroundColor?.withAlphaComponent(CGFloat(sliderOutlet.value))
-        
+        let backGroundColor = scrollViewOutlet.backgroundColor
+        scrollViewOutlet.backgroundColor = backGroundColor?.withAlphaComponent(CGFloat(sliderOutlet.value))
+            
         mainLabel.font = mainLabel.font.withSize(30)
         mainLabel.text = "\(Int(sliderOutlet.value))"
     }
     
 
     @IBAction func doneButtonPressed() {
-        guard let text = textFieldOutlet.text,textFieldOutlet.text != "",text.isEmpty else {return}
-        mainLabel.text = text
+        guard let text = textFieldOutlet.text,textFieldOutlet.text != "" else {return}
+        if Double(text) != nil {
+            print("Wrong Format")
+            showAlert(title: "Wrong Format", message: "Please enter your name ")
+
+        } else {
+            mainLabel.text = text
+            textFieldOutlet.text = nil
+        }
     }
+    
+    @IBAction func changeDate() {
+        let data = DateFormatter()
+        data.dateStyle = .medium
+        data.locale = Locale(identifier: "ru_RU")
+        
+        let dateValue = data.string(from: datePickerOutlet.date)
+        mainLabel.text = dateValue
+    }
+    
+    @IBAction func SwitchOnOfAction() {
+        segmentControlOutlet.isHidden.toggle()
+        datePickerOutlet.isHidden.toggle()
+        mainLabel.isHidden.toggle()
+        textFieldOutlet.isHidden.toggle()
+        doneButtonOutlet.isHidden.toggle()
+        sliderOutlet.isHidden.toggle()
+        
+        switchLabel.text = switchOnOffOutlet.isOn ? "Hide all elements" : "Show all elements "
+  
+        
+        
+    }
+    
+    
 }
 
-extension ViewController:UITextFieldDelegate {
-    
+extension ViewController {
+    private func showAlert(title:String,message:String) {
+        
+        let alertController = UIAlertController(title: title,
+                                                message: message,
+                                                preferredStyle: .alert)
+        
+        let alertAction = UIAlertAction(title: "Change", style: .default, handler: {_ in
+            self.textFieldOutlet.text = nil
+        })
+        
+        alertController.addAction(alertAction)
+        
+        present(alertController, animated: true)
+    }
 }
